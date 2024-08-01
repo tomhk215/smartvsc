@@ -1,26 +1,89 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const DEBUG = true;
+
 export function activate(context: vscode.ExtensionContext) {
+    let outputChannel: vscode.OutputChannel | undefined;
+    if (DEBUG) {		
+        outputChannel = vscode.window.createOutputChannel("SmartVSC");
+        outputChannel.show(true);
+    }
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "smartvsc" is now active!');
+    let moveHistory: { docId: string, char: string }[] = [
+        { docId: '', char: '' },
+        { docId: '', char: '' }
+    ];
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('smartvsc.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from SmartVSC!');
-	});
+    let smartNextChar = vscode.commands.registerCommand('extension.smartNextChar', () => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const document = editor.document;
+            const selection = editor.selection;
+            const position = selection.active;
+            const docId = document.uri.toString();
 
-	context.subscriptions.push(disposable);
+            const nextPosition = position.translate(0, 1);
+            let nextChar: string;
+            if (position.character === document.lineAt(position.line).range.end.character) {
+                nextChar = 'NL';
+            } else {
+                nextChar = document.getText(new vscode.Range(position, nextPosition));
+            }
+
+            if (DEBUG && outputChannel !== undefined) {
+                outputChannel.appendLine(
+                    `Executed Command 'SmartNextChar'\t| ` +
+                    `Move History: '${moveHistory[0].char}'-'${moveHistory[1].char}'\t| ` +
+                    `Current Char: '${nextChar}'`);
+            }
+
+            if (moveHistory[0].char === '\t' && moveHistory[1].char === '\t' && nextChar === '\t' &&
+                moveHistory[0].docId === docId && moveHistory[1].docId === docId) {
+                // Skip all tabs
+                let newPosition = position;
+                while (document.getText(new vscode.Range(newPosition, newPosition.translate(0, 1))) === '\t') {
+                    newPosition = newPosition.translate(0, 1);
+                }
+                editor.selection = new vscode.Selection(newPosition, newPosition);
+                moveHistory.shift();
+                moveHistory.push({ docId: docId, char: '\t' });
+            } else if (moveHistory[0].char === 'SP' && moveHistory[1].char === 'SP' && nextChar === ' ' &&
+                moveHistory[0].docId === docId && moveHistory[1].docId === docId) {
+                // Skip all spaces
+                let newPosition = position;
+                while (document.getText(new vscode.Range(newPosition, newPosition.translate(0, 1))) === ' ') {
+                    newPosition = newPosition.translate(0, 1);
+                }
+                editor.selection = new vscode.Selection(newPosition, newPosition);
+                moveHistory.shift();
+                moveHistory.push({ docId: docId, char: 'SP' });
+            } 
+            else if (position.character === document.lineAt(position.line).range.end.character) {
+                    // Move to the start of the next line if at the end of the current line
+                    let nextLine = position.line + 1;
+                    if (moveHistory[0].docId === docId && moveHistory[1].docId === docId &&
+                        moveHistory[0].char === 'NL' && moveHistory[1].char === 'NL') {
+                        if (nextLine < document.lineCount) {
+                            while (nextLine < document.lineCount && document.lineAt(nextLine).isEmptyOrWhitespace) {
+                                nextLine++; // Skip empty lines
+                            }
+                        }
+                    }
+                            
+                    const newPosition = new vscode.Position(nextLine, 0);
+                    editor.selection = new vscode.Selection(newPosition, newPosition);
+                    moveHistory.shift();
+                    moveHistory.push({ docId: docId, char: 'NL' });
+            } 
+            else {
+                editor.selection = new vscode.Selection(nextPosition, nextPosition);
+                moveHistory.shift();
+                moveHistory.push({ docId: docId, char: document.getText(new vscode.Range(position, nextPosition))});
+            }
+        }
+    });
+
+    context.subscriptions.push(smartNextChar);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
