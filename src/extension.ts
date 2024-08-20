@@ -60,6 +60,65 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Register smartPrevChar command
+    // This command moves the cursor to the previous character
+    // This command will skip over consecutive spaces, tabs and newlines
+    const smartPreviousChar = vscode.commands.registerCommand('extension.smartPreviousChar', () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) { return; }
+
+        const document = editor.document;
+        const position = editor.selection.active;
+        const docId = document.uri.toString();
+
+        let prevChar: string;
+        let prevPosition: vscode.Position;
+
+        const currentLine = document.lineAt(position.line);
+        const isStartOfLine = position.character === 0;
+
+        if (isStartOfLine) {
+            if (position.line === 0) {
+                prevPosition = position;
+                prevChar = 'BOF';
+            } else {
+                prevPosition = new vscode.Position(position.line - 1, document.lineAt(position.line - 1).range.end.character);
+                prevChar = 'NL';
+            }
+        } else {
+            prevPosition = position.translate(0, -1);
+            prevChar = document.getText(new vscode.Range(prevPosition, position));
+        }
+
+        if (moveHistory.length >= 2) {
+            const [firstMove, secondMove] = moveHistory.slice(-2);
+            const isSmartPrevChar = firstMove.command === 'smartPrevChar' && secondMove.command === 'smartPrevChar';
+            const isSameChar = firstMove.char === secondMove.char;
+            const isSameDoc = firstMove.docId === docId && secondMove.docId === docId;
+
+            if (isSmartPrevChar && isSameChar && isSameDoc) {
+                const char = firstMove.char;
+                if (char === '\t' || char === ' ') {
+                    while (prevPosition.character > 0 && document.getText(new vscode.Range(prevPosition, prevPosition.translate(0, -1))) === char) {
+                        console.log('prevPosition', prevPosition);
+                        prevPosition = prevPosition.translate(0, -1);
+                    }
+                } else if (char === 'NL') {
+                    while (prevPosition.line > 0 && document.lineAt(prevPosition.line).isEmptyOrWhitespace) {
+                        prevPosition = prevPosition.translate(-1, 0);
+                    }
+                }
+            }
+        }
+        console.log('Move');
+        console.log('prevPosition', prevPosition);
+        editor.selection = new vscode.Selection(prevPosition, prevPosition);
+        moveHistory.push({ docId: docId, char: prevChar, command: 'smartPrevChar' });
+        if (moveHistory.length > 2) {
+            moveHistory.shift();
+        }
+    });
+
     // Add event listener for mouse clicks
     // Clear move history when mouse is used to change selection
     vscode.window.onDidChangeTextEditorSelection((event) => {
@@ -68,7 +127,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(smartNextChar);
+    context.subscriptions.push(smartNextChar, smartPreviousChar);
+
 }
 
 export function deactivate() {}

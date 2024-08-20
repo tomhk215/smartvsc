@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.smartNextChar"
+    "onCommand:extension.smartNextChar",
+    "onCommand:extension.smartPreviousChar"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -18,12 +19,21 @@
           {
             "command": "extension.smartNextChar",
             "title": "Smart Next Char"
+          },
+          {
+            "command": "extension.smartPreviousChar",
+            "title": "Smart Previous Char"
           }
         ],
         "keybindings": [
             {
                 "command": "extension.smartNextChar",
                 "key": "ctrl+l",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.smartPreviousChar",
+                "key": "ctrl+j",
                 "when": "editorTextFocus"
             }
         ]
