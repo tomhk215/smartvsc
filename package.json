@@ -2,6 +2,7 @@
   "name": "smartvsc",
   "displayName": "SmartVSC",
   "description": "Smart Tool for Visual Studio Code",
+  "publisher": "Kabigon",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.91.0"
