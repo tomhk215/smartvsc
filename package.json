@@ -29,12 +29,12 @@
         "keybindings": [
             {
                 "command": "extension.smartNextChar",
-                "key": "ctrl+l",
+                "key": "Right",
                 "when": "editorTextFocus"
             },
             {
                 "command": "extension.smartPreviousChar",
-                "key": "ctrl+j",
+                "key": "Left",
                 "when": "editorTextFocus"
             }
         ]
