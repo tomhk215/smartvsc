@@ -1,7 +1,9 @@
-# smartvsc README
+# SmartVSC
 
-This is the README for your extension "smartvsc". After writing up a brief description, we recommend including the following sections.
+A smart text editing extension to improve efficiency and user experience in VS Code.
 
+
+<!-- 
 ## Features
 
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
@@ -68,4 +70,4 @@ You can author your README using Visual Studio Code. Here are some useful editor
 * [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
 * [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
-**Enjoy!**
+**Enjoy!** -->
