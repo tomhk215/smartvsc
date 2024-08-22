@@ -100,7 +100,6 @@ export function activate(context: vscode.ExtensionContext) {
                 const char = firstMove.char;
                 if (char === '\t' || char === ' ') {
                     while (prevPosition.character > 0 && document.getText(new vscode.Range(prevPosition, prevPosition.translate(0, -1))) === char) {
-                        console.log('prevPosition', prevPosition);
                         prevPosition = prevPosition.translate(0, -1);
                     }
                 } else if (char === 'NL') {
