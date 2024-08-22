@@ -107,11 +107,11 @@ export function activate(context: vscode.ExtensionContext) {
                     while (prevPosition.line > 0 && document.lineAt(prevPosition.line).isEmptyOrWhitespace) {
                         prevPosition = prevPosition.translate(-1, 0);
                     }
+                    prevPosition = new vscode.Position(prevPosition.line, document.lineAt(prevPosition.line).range.end.character);
                 }
             }
         }
-        console.log('Move');
-        console.log('prevPosition', prevPosition);
+
         editor.selection = new vscode.Selection(prevPosition, prevPosition);
         moveHistory.push({ docId: docId, char: prevChar, command: 'smartPrevChar' });
         if (moveHistory.length > 2) {
