@@ -2,6 +2,16 @@
 
 A smart text editing extension to improve efficiency and user experience in VS Code.
 
+## Commands
+
+### `smartNextChar`
+
+Moves the cursor to the next character while skipping consecutive spaces, tabs, and newlines if detected in consecutive movements.
+
+### `smartPreviousChar`
+
+Moves the cursor to the previous character while skipping consecutive spaces, tabs, and newlines if detected in consecutive movements.
+
 
 <!-- 
 ## Features
